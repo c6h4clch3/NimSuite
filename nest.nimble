@@ -13,3 +13,6 @@ bin           = @["nest"]
 # Dependencies
 
 requires "nim >= 1.0.4"
+
+task start, "an alias for `nimble run nest`.":
+  exec("nimble run nest")

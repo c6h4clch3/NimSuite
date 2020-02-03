@@ -10,3 +10,6 @@ import unittest
 import nestpkg/submodule
 test "correct welcome":
   check getWelcomeMessage() == "Hello, World!"
+
+test "failed welcome":
+  check not(getWelcomeMessage() == "Hello, World!")

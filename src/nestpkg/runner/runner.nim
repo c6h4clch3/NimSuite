@@ -12,22 +12,25 @@ type Option = object
 type Runner = object
   commands: seq[Command]
   options: seq[Option]
-var runner = Runner(commands: @[], options: @[])
 
-proc addCommand*(name: string, task: (seq[string]) -> void) =
+proc newRunner*(): Runner =
+  return Runner(commands: @[], options: @[])
+
+proc addCommand*(runner: var Runner, name: string, task: (seq[string]) -> void) =
   runner.commands.add Command(
     name: name,
     task: task
   )
 
-proc addOption*(name: string, task: (string) -> void, short: string = "") =
+proc addOption*(runner: var Runner, name: string, task: (string) -> void,
+    short: string = "") =
   runner.options.add Option(
     name: name,
     short: short,
     task: task
   )
 
-proc runOption(option: string) =
+proc runOption(runner: Runner, option: string) =
   var commands = option.split(":")
   if (commands.len == 1):
     commands.add ""
@@ -47,26 +50,32 @@ proc runOption(option: string) =
       o.task(args)
       return
 
-proc runCommand(name: string, args: seq[string]) =
+proc runCommand(runner: Runner, name: string, args: seq[string]) =
   for c in runner.commands.items:
     var hits = c.name == name
     if hits:
       c.task(args)
       return
+  for c in runner.commands.items:
+    if c.name == "[*]":
+      var vars = @[name]
+      vars.add args
+      c.task(vars)
+      return
 
-proc run*() =
+proc run*(runner: Runner) =
   var args = commandLineParams()
   if (args.len == 0):
-    args.add "help"
+    args.add ""
   while true:
     if (args.len == 0):
       echo("needs to have an command.")
-      runCommand("help", @[])
+      runner.runCommand("help", @[])
       break
     var nextArg = args[0]
     args.delete(0)
     if (nextArg.startsWith "-"):
-      runOption(nextArg)
+      runner.runOption(nextArg)
     else:
-      runCommand(nextArg, args)
+      runner.runCommand(nextArg, args)
       break

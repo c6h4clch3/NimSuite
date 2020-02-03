@@ -1,11 +1,10 @@
 import strutils
 import os
+import osproc
 
 proc getTarget*(targetTest: string): seq[tuple[path: string,
     filename: string]] =
-  var (targetStr, exc) = gorgeEx "find tests -name t\\*.nim"
-  if exc != 0:
-    raise newException(Exception, "an error caused in target finding.")
+  var targetStr = osproc.execProcess "find tests -name t\\*.nim"
   result = @[]
   for target in targetStr.splitLines:
     if target == "":
