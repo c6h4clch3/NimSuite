@@ -1,10 +1,10 @@
 # This is just an example to get you started. A typical hybrid package
 # uses this file as the main entry point of the application.
 
-import nestpkg/runner/runner
-import nestpkg/locator/getTarget
-import nestpkg/executer/executeTests
-import nestpkg/test/printColored
+import nimsuitepkg/runner/runner
+import nimsuitepkg/locator/getTarget
+import nimsuitepkg/executer/executeTests
+import nimsuitepkg/test/printColored
 
 when isMainModule:
   var r = newRunner()
@@ -17,7 +17,7 @@ when isMainModule:
     optBag.add(ExecTestsOption.Clean)
   )
   r.addCommand("help", proc (_: seq[string]) {.closure.} =
-    const helpTxt = staticRead("./nestpkg/assets/text/help.txt")
+    const helpTxt = staticRead("./nimsuitepkg/assets/text/help.txt")
     echo helpTxt.substr(0, len(helpTxt) - 2)
   )
   r.addCommand("[*]", proc (args: seq[string]) {.closure.} =

@@ -7,7 +7,7 @@
 
 import unittest
 
-import nestpkg/submodule
+import nimsuitepkg/submodule
 test "correct welcome":
   check getWelcomeMessage() == "Hello, World!"
 
