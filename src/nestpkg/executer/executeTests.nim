@@ -4,12 +4,39 @@ import osproc
 
 import ../presenter/presenter
 
-type ExecTestsOptions* = enum
+type ExecTestsOption* = enum
   Verbose
+  Clean
+  Output
 
-proc execTests*(targets: seq[tuple[path: string, filename: string]],
-    present: Presenter, options: set[ExecTestsOptions] = {}) =
-  var home = os.getCurrentDir()
+type ExecTestOptionValue = tuple
+  option: ExecTestsOption
+  value: string
+
+type ExecTestsOptionsBag = seq[ExecTestOptionValue]
+
+proc makeOptionsBag*(): ExecTestsOptionsBag =
+  return @[]
+
+proc add*(b: var ExecTestsOptionsBag, o: ExecTestsOption, v: string = "") =
+  b.add (o, v)
+
+proc contains(b: ExecTestsOptionsBag, o: ExecTestsOption): bool =
+  for ov in b.items:
+    if ov.option == o:
+      return true
+  return false
+
+proc find(b: ExecTestsOptionsBag, o: ExecTestsOption): ExecTestOptionValue =
+  for ov in b.items:
+    if ov.option == o:
+      return ov
+  return
+
+proc execTests*(home: string, targets: seq[tuple[path: string,
+    filename: string]], present: Presenter, options: ExecTestsOptionsBag) =
+  let absHome = os.absolutePath(home)
+  os.setCurrentDir(absHome)
   var cases = 0
   var succs = 0
   var fails = 0
@@ -44,7 +71,8 @@ proc execTests*(targets: seq[tuple[path: string, filename: string]],
         present(output)
       except OSError:
         echo "test for " & filename & ".nim failed"
-      os.removeFile filename
+      if options.contains(Clean):
+        os.removeFile filename
       echo ""
-      os.setCurrentDir home
+      os.setCurrentDir absHome
     echo $cases & " Test cases, " & $succs & " cases OK, " & $fails & " cases Failed."

@@ -69,8 +69,7 @@ proc run*(runner: Runner) =
     args.add ""
   while true:
     if (args.len == 0):
-      echo("needs to have an command.")
-      runner.runCommand("help", @[])
+      runner.runCommand("", @[])
       break
     var nextArg = args[0]
     args.delete(0)
