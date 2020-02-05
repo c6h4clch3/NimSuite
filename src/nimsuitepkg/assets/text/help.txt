@@ -1,1 +1,18 @@
-usage: nest [options] <target>
+usage: nimsuite [options] (<commands> | <target>)
+
+NimSuite is a simple unit test framework, based on Nimble's standard unit tests.
+
+As `nimble test`, NimSuite runs the test of `.nim` file which is under `tests` directory and filename starts with `t`.
+
+options:
+
+  --verbose:
+    displays all messages when compile test files.
+
+  --clean:
+    removes the test binary after execute it.
+
+commands:
+
+  help:
+    displays this help message.
