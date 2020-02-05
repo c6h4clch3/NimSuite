@@ -4,7 +4,7 @@ import strutils
 
 type Command = object
   name: string
-  task: (seq[string]) -> void
+  task: (seq[string]) -> int
 type Option = object
   name: string
   short: string
@@ -16,7 +16,7 @@ type Runner = object
 proc newRunner*(): Runner =
   return Runner(commands: @[], options: @[])
 
-proc addCommand*(runner: var Runner, name: string, task: (seq[string]) -> void) =
+proc addCommand*(runner: var Runner, name: string, task: (seq[string]) -> int) =
   runner.commands.add Command(
     name: name,
     task: task
@@ -50,31 +50,27 @@ proc runOption(runner: Runner, option: string) =
       o.task(args)
       return
 
-proc runCommand(runner: Runner, name: string, args: seq[string]) =
+proc runCommand(runner: Runner, name: string, args: seq[string]): int =
   for c in runner.commands.items:
     var hits = c.name == name
     if hits:
-      c.task(args)
-      return
+      return c.task(args)
   for c in runner.commands.items:
     if c.name == "[*]":
       var vars = @[name]
       vars.add args
-      c.task(vars)
-      return
+      return c.task(vars)
 
-proc run*(runner: Runner) =
+proc run*(runner: Runner): int =
   var args = commandLineParams()
   if (args.len == 0):
     args.add ""
   while true:
     if (args.len == 0):
-      runner.runCommand("", @[])
-      break
+      return runner.runCommand("", @[])
     var nextArg = args[0]
     args.delete(0)
     if (nextArg.startsWith "-"):
       runner.runOption(nextArg)
     else:
-      runner.runCommand(nextArg, args)
-      break
+      return runner.runCommand(nextArg, args)

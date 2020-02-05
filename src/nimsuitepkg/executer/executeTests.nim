@@ -4,6 +4,10 @@ import osproc
 
 import ../presenter/presenter
 
+type ExecTestReturnCode = enum
+  Ok = 0
+  Error = 1
+
 type ExecTestsOption* = enum
   Verbose
   Clean
@@ -40,7 +44,8 @@ proc getCompileCmd(filename: string, isSilent: bool): string =
     return "nim c " & filename
 
 proc execTests*(home: string, targets: seq[tuple[path: string,
-    filename: string]], present: Presenter, options: ExecTestsOptionsBag) =
+    filename: string]], present: Presenter,
+        options: ExecTestsOptionsBag): ExecTestReturnCode =
   let absHome = os.absolutePath(home)
   os.setCurrentDir(absHome)
   var cases = 0
@@ -48,6 +53,7 @@ proc execTests*(home: string, targets: seq[tuple[path: string,
   var fails = 0
   if targets.len == 0:
     echo "no tests found."
+    return Error
   else:
     for (path, filename) in targets.items:
       echo "Compiling " & path & "/" & filename & "..."
@@ -78,3 +84,5 @@ proc execTests*(home: string, targets: seq[tuple[path: string,
       echo ""
       os.setCurrentDir absHome
     echo $cases & " Test cases, " & $succs & " cases OK, " & $fails & " cases Failed."
+    return if fails > 0: Error
+      else: Ok
