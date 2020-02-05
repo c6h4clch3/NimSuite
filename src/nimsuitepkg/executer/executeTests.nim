@@ -33,6 +33,12 @@ proc find(b: ExecTestsOptionsBag, o: ExecTestsOption): ExecTestOptionValue =
       return ov
   return
 
+proc getCompileCmd(filename: string, isSilent: bool): string =
+  if isSilent:
+    return "nim c --hints:off " & filename & " > /dev/null"
+  else:
+    return "nim c " & filename
+
 proc execTests*(home: string, targets: seq[tuple[path: string,
     filename: string]], present: Presenter, options: ExecTestsOptionsBag) =
   let absHome = os.absolutePath(home)
@@ -40,10 +46,6 @@ proc execTests*(home: string, targets: seq[tuple[path: string,
   var cases = 0
   var succs = 0
   var fails = 0
-  var compileCmd = if options.contains(Verbose):
-    "nim c "
-  else:
-    "nim c --hints:off "
   if targets.len == 0:
     echo "no tests found."
   else:
@@ -53,7 +55,7 @@ proc execTests*(home: string, targets: seq[tuple[path: string,
       os.setCurrentDir(path)
 
       try:
-        discard osproc.execCmd(compileCmd & filename)
+        discard osproc.execCmd(getCompileCmd(filename, not options.contains(Verbose)))
       except OSError:
         echo "test for " & filename & ".nim failed"
 
