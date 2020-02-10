@@ -1,6 +1,7 @@
 import strutils
 import os
 import osproc
+import distros
 
 import ../presenter/presenter
 
@@ -38,8 +39,16 @@ proc find(b: ExecTestsOptionsBag, o: ExecTestsOption): ExecTestOptionValue =
   return
 
 proc getCompileCmd(filename: string, isSilent: bool): string =
+  var blackhole: string
+  if detectOs(Posix):
+    blackhole = " > /dev/null"
+  elif detectOs(Windows):
+    blackhole = " > NUL"
+  else:
+    blackhole = ""
+
   if isSilent:
-    return "nim c --hints:off " & filename & " > /dev/null"
+    return "nim c --hints:off " & filename & blackhole
   else:
     return "nim c " & filename
 
