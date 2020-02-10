@@ -4,6 +4,7 @@ import osproc
 import distros
 
 import ../presenter/presenter
+import ../options/optionsBag
 
 type ExecTestReturnCode = enum
   Ok = 0
@@ -13,30 +14,6 @@ type ExecTestsOption* = enum
   Verbose
   Clean
   Output
-
-type ExecTestOptionValue = tuple
-  option: ExecTestsOption
-  value: string
-
-type ExecTestsOptionsBag = seq[ExecTestOptionValue]
-
-proc makeOptionsBag*(): ExecTestsOptionsBag =
-  return @[]
-
-proc add*(b: var ExecTestsOptionsBag, o: ExecTestsOption, v: string = "") =
-  b.add (o, v)
-
-proc contains(b: ExecTestsOptionsBag, o: ExecTestsOption): bool =
-  for ov in b.items:
-    if ov.option == o:
-      return true
-  return false
-
-proc find(b: ExecTestsOptionsBag, o: ExecTestsOption): ExecTestOptionValue =
-  for ov in b.items:
-    if ov.option == o:
-      return ov
-  return
 
 proc getCompileCmd(filename: string, isSilent: bool): string =
   var blackhole: string
@@ -54,7 +31,7 @@ proc getCompileCmd(filename: string, isSilent: bool): string =
 
 proc execTests*(home: string, targets: seq[tuple[path: string,
     filename: string]], present: Presenter,
-        options: ExecTestsOptionsBag): ExecTestReturnCode =
+        options: OptionBag[ExecTestsOption]): ExecTestReturnCode =
   let absHome = os.absolutePath(home)
   os.setCurrentDir(absHome)
   var cases = 0

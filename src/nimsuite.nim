@@ -4,11 +4,12 @@
 import nimsuitepkg/runner/runner
 import nimsuitepkg/locator/getTarget
 import nimsuitepkg/executer/executeTests
+import nimsuitepkg/options/optionsBag
 import nimsuitepkg/test/printColored
 
 when isMainModule:
   var r = newRunner()
-  var optBag = makeOptionsBag()
+  var optBag = optionsBag.makeOptionBag[ExecTestsOption]()
 
   r.addOption("verbose", proc (_: string) =
     optBag.add(ExecTestsOption.Verbose)
