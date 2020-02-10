@@ -16,12 +16,12 @@ when isMainModule:
   r.addOption("clean", proc (_: string) =
     optBag.add(ExecTestsOption.Clean)
   )
-  r.addCommand("help", proc (_: seq[string]): int {.closure.} =
+  r.addCommand("help", proc (_: seq[string]): int =
     const helpTxt = staticRead("./nimsuitepkg/assets/text/help.txt")
     echo helpTxt.substr(0, len(helpTxt) - 2)
     return 0
   )
-  r.addCommand("[*]", proc (args: seq[string]): int {.closure.} =
+  r.addCommand("[*]", proc (args: seq[string]): int =
     var targets = getTarget("tests", args[0])
     return int execTests("tests", targets, presentTestResult, optBag)
   )
