@@ -1,4 +1,1 @@
 nimsuite
-tests/
-!tests/*.nim
-!tests/*.nims
