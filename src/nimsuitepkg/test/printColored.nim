@@ -3,34 +3,61 @@ import terminal
 
 import ../presenter/presenter
 
-var presentTestResult*: Presenter = proc (output: string) =
-  for l in output.splitLines:
+type PaintRule = object
+  keyword: string
+  color: ForegroundColor
+  bgColor: BackgroundColor
+  styles: set[Style]
+
+proc paint(p: PaintRule, line: string) =
+  var target = line.substr(0, p.keyword.len - 1)
+  var others = line.substr(p.keyword.len)
+  if not(cast[int](p.color) == 0):
+    setForegroundColor(stdout, p.color)
+  if not(cast[int](p.bgColor) == 0):
+    setBackgroundColor(stdout, p.bgColor)
+  setStyle(stdout, p.styles)
+  write(stdout, target)
+  resetAttributes(stdout)
+  echo others
+
+type Painter = object
+  rules: seq[PaintRule]
+
+proc addRule(p: var Painter, r: PaintRule) =
+  p.rules.add r
+
+proc run(p: Painter, str: string) =
+  for l in str.splitLines:
     let fullLen = l.len
     let trimed = l.unindent
     let spaceLen = fullLen - trimed.len
     write(stdout, spaces(spaceLen))
-    if trimed.startsWith("[OK]"):
-      var okStr = trimed.substr(0, 3)
-      var others = trimed.substr(4)
-      setForegroundColor(stdout, fgGreen)
-      write(stdout, okStr)
-      resetAttributes(stdout)
-      echo others
-    elif trimed.startsWith("[FAILED]"):
-      var errStr = trimed.substr(0, 7)
-      var others = trimed.substr(8)
-      setForegroundColor(stdout, fgRed)
-      write(stdout, errStr)
-      resetAttributes(stdout)
-      echo others
-    elif trimed.startsWith("[Suite]"):
-      var suiteStr = trimed.substr(0, 6)
-      var others = trimed.substr(7)
-      setForegroundColor(stdout, fgBlue)
-      write(stdout, suiteStr)
-      resetAttributes(stdout)
-      echo others
-    else:
+
+    var hit = false
+    for r in p.rules:
+      if trimed.startsWith(r.keyword):
+        hit = true
+        r.paint(trimed)
+    if not hit:
       echo trimed
 
+var presentTestResult*: Presenter = proc (output: string) =
+  var painter = Painter(rules: @[])
+  painter.addRule(PaintRule(
+    keyword: "[OK]",
+    color: fgGreen,
+    styles: {styleBright}
+  ))
+  painter.addRule(PaintRule(
+    keyword: "[FAILED]",
+    color: fgRed,
+    styles: {styleBright}
+  ))
+  painter.addRule(PaintRule(
+    keyword: "[Suite]",
+    color: fgBlue,
+    styles: {styleBright}
+  ))
 
+  painter.run(output)
