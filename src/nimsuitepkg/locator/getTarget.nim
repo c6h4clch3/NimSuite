@@ -11,5 +11,11 @@ proc getTarget*(targetDir, targetTestSuite: string): seq[tuple[path: string,
     var (path, filename, ext) = os.splitFile(item)
     if (ext != ".nim"): continue
     if (not filename.startsWith("t")): continue
-    result.add (path: path, filename: filename)
+    if (not (targetTestSuite == "")):
+      let absTarget = absolutePath targetTestSuite
+      let absPath = absolutePath(path & "/" & filename)
+      if absPath == absTarget:
+        result.add (path: path, filename: filename)
+    else:
+      result.add (path: path, filename: filename)
   os.setCurrentDir(home)
